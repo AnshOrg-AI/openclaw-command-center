@@ -264,7 +264,96 @@ Building on OpenClaw's native cron system with intelligent scheduling primitives
 
 ## Screenshots
 
-*Coming soon*
+### Dashboard Overview
+
+The hero view shows key metrics at a glance: total tokens, costs, active sessions, estimated savings, and system capacity.
+
+<p align="center">
+  <img src="docs/screenshots/hero.png" alt="Dashboard Hero" width="800">
+</p>
+
+### Sessions Panel
+
+Monitor all active AI sessions in real-time. Each card shows model, channel, token usage, cost, and activity status. Filter by status (live/recent/idle), channel, or session type.
+
+<p align="center">
+  <img src="docs/screenshots/sessions-panel.png" alt="Sessions Panel" width="800">
+</p>
+
+### Cron Jobs
+
+View and manage scheduled tasks. See run history, next scheduled time, and enable/disable jobs. The dashboard shows job success/failure sparklines and filters by status and schedule type.
+
+<p align="center">
+  <img src="docs/screenshots/cron-panel.png" alt="Cron Jobs Panel" width="800">
+</p>
+
+### Cerebro Topics
+
+Automatic conversation organization. Topics are auto-detected from Slack threads, with status tracking (active/resolved/parked), thread counts, and quick navigation. Privacy controls let you hide sensitive topics.
+
+<p align="center">
+  <img src="docs/screenshots/cerebro-panel.png" alt="Cerebro Topics Panel" width="800">
+</p>
+
+### Operators
+
+See who's interacting with your AI agents. Track active sessions per operator, permission levels, and last activity timestamps.
+
+<p align="center">
+  <img src="docs/screenshots/operators-panel.png" alt="Operators Panel" width="800">
+</p>
+
+### Memory Browser
+
+Browse your agent's memory files — daily logs, long-term memory, and workspace files. Quick navigation with file sizes and modification times.
+
+<p align="center">
+  <img src="docs/screenshots/memory-panel.png" alt="Memory Panel" width="800">
+</p>
+
+### Cost Breakdown Modal
+
+Click on any cost stat to see detailed breakdowns: token usage by type, pricing rates, and calculation methodology. Includes estimated savings vs. manual work.
+
+<p align="center">
+  <img src="docs/screenshots/cost-modal.png" alt="Cost Breakdown Modal" width="800">
+</p>
+
+### Operator Details
+
+Click on an operator card to see their session history, stats, and activity timeline.
+
+<p align="center">
+  <img src="docs/screenshots/operator-modal.png" alt="Operator Details Modal" width="800">
+</p>
+
+### Privacy Settings
+
+Control what's visible for demos and screenshots. Hide sensitive topics, sessions, or cron jobs. Settings sync to the server automatically.
+
+<p align="center">
+  <img src="docs/screenshots/privacy-modal.png" alt="Privacy Settings Modal" width="800">
+</p>
+
+### Session Details
+
+Click any session card to see detailed information: summary, key facts, tools used, and recent messages.
+
+<p align="center">
+  <img src="docs/screenshots/session-detail.png" alt="Session Details Panel" width="800">
+</p>
+
+### Full Dashboard
+
+The complete dashboard with all panels visible.
+
+<details>
+<summary>Click to expand full dashboard view</summary>
+<p align="center">
+  <img src="docs/screenshots/dashboard-full.png" alt="Full Dashboard" width="800">
+</p>
+</details>
 
 ---
 
