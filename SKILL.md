@@ -1,92 +1,70 @@
 ---
 name: command-center
-description: Real-time dashboard for OpenClaw. Monitor sessions, LLM usage, system vitals, and cron jobs. Zero config, auto-detects your workspace.
+description: Mission control dashboard for OpenClaw - real-time session monitoring, LLM usage tracking, cost intelligence, and system vitals. View all your AI agents in one place.
+metadata:
+  openclaw:
+    requires:
+      node: ">=18"
+    install:
+      - id: start
+        kind: shell
+        command: "node lib/server.js"
+        label: "Start Command Center (http://localhost:3333)"
 ---
 
 # OpenClaw Command Center
 
-Real-time dashboard for your OpenClaw agents.
+Mission control for your AI workforce.
 
 ## Quick Start
 
 ```bash
-# Install
+# Install from ClawHub
 clawhub install command-center
 
-# Start
-cd skills/command-center && node lib/server.js
+# Start the dashboard
+cd ~/.openclaw/skills/command-center
+node lib/server.js
 ```
 
-**That's it.** Dashboard runs at http://localhost:3333
+Dashboard runs at **http://localhost:3333**
 
-## What You'll See
+## Features
 
-- 📊 **Sessions** — Who's talking to your agents right now
-- ⛽ **LLM Usage** — Token consumption, costs, quota remaining
-- 💻 **System Vitals** — CPU, memory, disk health
-- ⏰ **Cron Jobs** — Scheduled tasks and their status
-- 🧠 **Cerebro** — Topics your agents are discussing
+- **Session Monitoring** — Real-time view of all AI sessions with live updates
+- **LLM Fuel Gauges** — Track Claude, Codex, and other model usage
+- **System Vitals** — CPU, Memory, Disk, Temperature
+- **Cron Jobs** — View and manage scheduled tasks
+- **Cerebro Topics** — Automatic conversation organization
+- **Cost Tracking** — Per-session costs, projections, savings estimates
+- **Privacy Controls** — Hide sensitive topics for demos
 
-## Zero Config
+## Configuration
 
-Command Center **auto-detects** your OpenClaw workspace. No config file needed.
+The dashboard auto-detects your OpenClaw workspace. Set `OPENCLAW_WORKSPACE` to override.
 
-It looks for:
-1. `$OPENCLAW_WORKSPACE` environment variable
-2. `~/.openclaw-workspace` or `~/openclaw-workspace`
-3. Common names: `~/molty`, `~/clawd`, `~/moltbot`
+### Authentication
 
-## Security
-
-By default, only accessible from `localhost`. To expose remotely:
+| Mode | Use Case |
+|------|----------|
+| `none` | Local development |
+| `token` | Remote access |
+| `tailscale` | Team VPN |
+| `cloudflare` | Public deployment |
 
 ```bash
-# Tailscale (recommended)
 DASHBOARD_AUTH_MODE=tailscale node lib/server.js
-
-# Token-based
-DASHBOARD_AUTH_MODE=token DASHBOARD_TOKEN=your-secret node lib/server.js
 ```
 
-## Optional: Run in Background
+## API
 
-```bash
-# Using make
-make start    # Starts in tmux
-make stop     # Stops the server
-make status   # Check if running
-
-# Or manually
-nohup node lib/server.js &
-```
-
-## Configuration (Optional)
-
-Most users don't need this. Environment variables for advanced use:
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server port | `3333` |
-| `OPENCLAW_WORKSPACE` | Workspace path | Auto-detect |
-| `OPENCLAW_PROFILE` | Profile name | (none) |
-| `DASHBOARD_AUTH_MODE` | Auth: `none`, `token`, `tailscale`, `cloudflare` | `none` |
-
-## Requirements
-
-- Node.js 18+ (no npm install needed)
-- OpenClaw workspace
-
-## Troubleshooting
-
-**Dashboard shows no data?**
-- Make sure OpenClaw is running and has active sessions
-- Check that your workspace path is correct
-
-**Can't connect?**
-- Default port is 3333: http://localhost:3333
-- Check if another process is using the port: `lsof -i:3333`
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/state` | All dashboard data (unified) |
+| `GET /api/events` | SSE stream for live updates |
+| `GET /api/health` | Health check |
 
 ## Links
 
 - [GitHub](https://github.com/jontsai/openclaw-command-center)
-- [ClawHub](https://clawhub.ai/jontsai/command-center)
+- [Documentation](https://github.com/jontsai/openclaw-command-center#readme)
