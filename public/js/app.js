@@ -316,6 +316,11 @@ async function fetchState() {
 // ============================================================================
 
 function init() {
+  // Check auth before initializing
+  if (!localStorage.getItem("cc_jwt")) {
+    location.replace("/login");
+    return;
+  }
   console.log("[App] Initializing OpenClaw Command Center");
   connectSSE();
 
