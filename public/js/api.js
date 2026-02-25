@@ -11,13 +11,61 @@ let pollInterval = null;
 const SSE_MAX_RECONNECT_DELAY = 30000;
 
 /**
+ * Get stored JWT token from localStorage
+ */
+export function getAuthToken() {
+  return localStorage.getItem("cc_jwt") || "";
+}
+
+/**
+ * Build Authorization headers object
+ */
+export function authHeaders() {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/**
+ * Authenticated fetch wrapper - adds JWT header and handles 401 → redirect to login
+ */
+export async function apiFetch(url, options = {}) {
+  const token = getAuthToken();
+  const headers = {
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  const response = await fetch(url, { ...options, headers });
+
+  if (response.status === 401) {
+    // Token expired or invalid — redirect to login
+    localStorage.removeItem("cc_jwt");
+    localStorage.removeItem("cc_user");
+    location.replace("/login?from=" + encodeURIComponent(location.pathname));
+    return null;
+  }
+
+  return response;
+}
+
+/**
  * Fetch the unified state from the server
  * @returns {Promise<Object>} Dashboard state
  */
 export async function fetchState() {
-  const response = await fetch("/api/state");
+  const response = await apiFetch("/api/state");
+  if (!response) return null;
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json();
+}
+
+/**
+ * Logout - clear token and redirect to login
+ */
+export function logout() {
+  localStorage.removeItem("cc_jwt");
+  localStorage.removeItem("cc_user");
+  location.replace("/login");
 }
 
 /**
@@ -36,7 +84,10 @@ export function connectSSE(onUpdate, onStatusChange) {
   onStatusChange?.("connecting", "Connecting...");
 
   try {
-    eventSource = new EventSource("/api/events");
+    // Pass JWT token via URL query param (EventSource doesn't support custom headers)
+    const token = getAuthToken();
+    const sseUrl = token ? `/api/events?token=${encodeURIComponent(token)}` : "/api/events";
+    eventSource = new EventSource(sseUrl);
 
     eventSource.onopen = function () {
       console.log("[SSE] Connected");
@@ -99,7 +150,7 @@ function startPolling(onUpdate) {
   pollInterval = setInterval(async () => {
     try {
       const state = await fetchState();
-      onUpdate?.(state);
+      if (state) onUpdate?.(state);
     } catch (err) {
       console.error("[Polling] Failed:", err);
     }

@@ -161,6 +161,29 @@
     </div>
   </div>
   <div class="sidebar-footer">
+    <div id="sidebar-user-info" style="margin-bottom:10px; font-size:0.78rem; color: #8b949e; display:flex; align-items:center; gap:6px; justify-content:center;">
+      <span>👤</span><span id="sidebar-username">-</span>
+    </div>
+    <button
+      id="logout-btn"
+      onclick="window.ccLogout && window.ccLogout()"
+      style="
+        width: 100%;
+        padding: 7px 12px;
+        background: rgba(248,81,73,0.1);
+        border: 1px solid rgba(248,81,73,0.3);
+        border-radius: 6px;
+        color: #f85149;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+        margin-bottom: 10px;
+        font-family: inherit;
+      "
+      onmouseover="this.style.background='rgba(248,81,73,0.2)'"
+      onmouseout="this.style.background='rgba(248,81,73,0.1)'"
+    >🚪 Logout</button>
     <span data-i18n="sidebar.autoRefresh">Auto-refresh: 30s</span><br />
     <span id="sidebar-updated">-</span>
   </div>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — OpenClaw Command Center</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #21262d;
+      --border: #30363d;
+      --accent: #f78166;
+      --accent2: #ff7b72;
+      --green: #3fb950;
+      --text: #c9d1d9;
+      --text-muted: #8b949e;
+      --red: #f85149;
+      --glow: rgba(247, 129, 102, 0.15);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Animated background */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(247,129,102,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(247,129,102,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(247,129,102,0.06) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 0;
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    /* Login card */
+    .login-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      padding: 16px;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 24px 64px rgba(0,0,0,0.5),
+        0 0 40px var(--glow);
+      animation: card-in 0.4s ease-out;
+    }
+
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo-area {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 0 20px rgba(247,129,102,0.4));
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-4px); }
+    }
+
+    .logo-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    .logo-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Form */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(247,129,102,0.15);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
+    .form-input.error {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(248,81,73,0.15);
+    }
+
+    /* Password toggle */
+    .input-wrapper {
+      position: relative;
+    }
+
+    .pw-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .pw-toggle:hover { color: var(--text); }
+
+    /* Error message */
+    .error-msg {
+      display: none;
+      background: rgba(248,81,73,0.1);
+      border: 1px solid rgba(248,81,73,0.3);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      color: var(--red);
+      margin-bottom: 18px;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .error-msg.visible {
+      display: flex;
+      animation: shake 0.3s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    /* Submit button */
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 4px 16px rgba(247,129,102,0.25);
+      letter-spacing: 0.02em;
+      margin-top: 6px;
+    }
+
+    .btn-login:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(247,129,102,0.35);
+    }
+
+    .btn-login:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-login .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    .btn-login.loading .spinner { display: inline-block; }
+    .btn-login.loading .btn-text { opacity: 0.8; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Footer */
+    .card-footer {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .footer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .footer-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 2s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    /* Success state */
+    .success-overlay {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px 0;
+    }
+
+    .success-overlay.visible { display: flex; }
+    .login-form.hidden { display: none; }
+
+    .success-icon {
+      font-size: 3rem;
+      animation: pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes pop-in {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .success-text {
+      color: var(--green);
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .success-sub {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <div class="login-container">
+    <div class="login-card">
+      <div class="logo-area">
+        <span class="logo-icon">🦞</span>
+        <div class="logo-title">Command Center</div>
+        <div class="logo-subtitle">OpenClaw Dashboard</div>
+      </div>
+
+      <!-- Success overlay -->
+      <div class="success-overlay" id="success-overlay">
+        <div class="success-icon">✅</div>
+        <div class="success-text">Welcome back!</div>
+        <div class="success-sub">Redirecting to dashboard…</div>
+      </div>
+
+      <!-- Login form -->
+      <div class="login-form" id="login-form">
+        <div class="error-msg" id="error-msg">
+          <span>⚠️</span>
+          <span id="error-text">Invalid username or password.</span>
+        </div>
+
+        <form id="form" autocomplete="on">
+          <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <input
+              class="form-input"
+              id="username"
+              type="text"
+              name="username"
+              placeholder="Enter username"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-wrapper">
+              <input
+                class="form-input"
+                id="password"
+                type="password"
+                name="password"
+                placeholder="Enter password"
+                autocomplete="current-password"
+                required
+              />
+              <button type="button" class="pw-toggle" id="pw-toggle" title="Toggle password visibility">
+                👁
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-login" id="login-btn">
+            <span class="spinner"></span>
+            <span class="btn-text">Sign In</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="card-footer">
+        <div class="footer-badge">
+          <span class="dot"></span>
+          <span>Secured with JWT · 24h session</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('form');
+    const loginBtn = document.getElementById('login-btn');
+    const errorMsg = document.getElementById('error-msg');
+    const errorText = document.getElementById('error-text');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const pwToggle = document.getElementById('pw-toggle');
+    const successOverlay = document.getElementById('success-overlay');
+    const loginForm = document.getElementById('login-form');
+
+    // If already logged in, redirect
+    const existingToken = localStorage.getItem('cc_jwt');
+    if (existingToken) {
+      const dest = new URLSearchParams(location.search).get('from') || '/';
+      location.replace(dest);
+    }
+
+    // Password toggle
+    pwToggle.addEventListener('click', () => {
+      const isHidden = passwordInput.type === 'password';
+      passwordInput.type = isHidden ? 'text' : 'password';
+      pwToggle.textContent = isHidden ? '🙈' : '👁';
+    });
+
+    // Clear errors on input
+    [usernameInput, passwordInput].forEach(el => {
+      el.addEventListener('input', () => {
+        el.classList.remove('error');
+        errorMsg.classList.remove('visible');
+      });
+    });
+
+    // Submit handler
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!username || !password) return;
+
+      // Loading state
+      loginBtn.disabled = true;
+      loginBtn.classList.add('loading');
+      errorMsg.classList.remove('visible');
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success && data.token) {
+          // Store token
+          localStorage.setItem('cc_jwt', data.token);
+          localStorage.setItem('cc_user', data.username || username);
+
+          // Show success
+          loginForm.classList.add('hidden');
+          successOverlay.classList.add('visible');
+
+          // Redirect
+          setTimeout(() => {
+            const dest = new URLSearchParams(location.search).get('from') || '/';
+            location.replace(dest);
+          }, 1000);
+        } else {
+          showError(data.error || 'Invalid credentials. Please try again.');
+          passwordInput.classList.add('error');
+          usernameInput.classList.add('error');
+        }
+      } catch (err) {
+        showError('Connection error. Please try again.');
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.classList.remove('loading');
+      }
+    });
+
+    function showError(msg) {
+      errorText.textContent = msg;
+      errorMsg.classList.add('visible');
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  </script>
+</body>
+</html>

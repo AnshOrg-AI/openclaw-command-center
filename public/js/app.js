@@ -28,6 +28,25 @@ const state = {
 };
 
 // ============================================================================
+// AUTH HELPERS
+// ============================================================================
+
+function getToken() { return localStorage.getItem("cc_jwt") || ""; }
+
+async function authFetch(url, opts = {}) {
+  const token = getToken();
+  const headers = { ...(opts.headers || {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+  const res = await fetch(url, { ...opts, headers });
+  if (res.status === 401) {
+    localStorage.removeItem("cc_jwt");
+    localStorage.removeItem("cc_user");
+    location.replace("/login?from=" + encodeURIComponent(location.pathname));
+    return null;
+  }
+  return res;
+}
+
+// ============================================================================
 // SSE CONNECTION
 // ============================================================================
 
@@ -44,7 +63,9 @@ function connectSSE() {
 
   updateConnectionStatus("connecting");
 
-  eventSource = new EventSource("/api/events");
+  const token = getToken();
+  const sseUrl = token ? `/api/events?token=${encodeURIComponent(token)}` : "/api/events";
+  eventSource = new EventSource(sseUrl);
 
   eventSource.onopen = () => {
     console.log("[SSE] Connected");
@@ -281,7 +302,8 @@ function startPolling() {
 
 async function fetchState() {
   try {
-    const response = await fetch("/api/state");
+    const response = await authFetch("/api/state");
+    if (!response) return;
     const data = await response.json();
     handleStateUpdate(data);
   } catch (e) {

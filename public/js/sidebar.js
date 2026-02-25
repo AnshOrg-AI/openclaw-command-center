@@ -29,6 +29,24 @@
   let reconnectAttempts = 0;
   const MAX_RECONNECT_DELAY = 30000;
 
+  // Auth helpers
+  function getToken() { return localStorage.getItem("cc_jwt") || ""; }
+  function getUser()  { return localStorage.getItem("cc_user") || ""; }
+
+  function authFetch(url, opts = {}) {
+    const token = getToken();
+    const headers = { ...(opts.headers || {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+    return fetch(url, { ...opts, headers }).then(r => {
+      if (r.status === 401) {
+        localStorage.removeItem("cc_jwt");
+        localStorage.removeItem("cc_user");
+        location.replace("/login?from=" + encodeURIComponent(location.pathname));
+        return null;
+      }
+      return r;
+    });
+  }
+
   /**
    * Load and inject sidebar HTML
    */
@@ -62,6 +80,9 @@
 
       // Also fetch initial state
       fetchSidebarState();
+
+      // Show user info / logout button
+      updateSidebarUser();
     } catch (error) {
       console.error("[Sidebar] Failed to load:", error);
     }
@@ -142,7 +163,9 @@
       return;
     }
 
-    eventSource = new EventSource("/api/events");
+    const token = getToken();
+    const sseUrl = token ? `/api/events?token=${encodeURIComponent(token)}` : "/api/events";
+    eventSource = new EventSource(sseUrl);
 
     eventSource.onopen = () => {
       console.log("[Sidebar SSE] Connected");
@@ -179,7 +202,8 @@
    */
   async function fetchSidebarState() {
     try {
-      const response = await fetch("/api/state");
+      const response = await authFetch("/api/state");
+      if (!response) return;
       const data = await response.json();
       handleStateUpdate(data);
     } catch (error) {
@@ -282,6 +306,32 @@
   }
 
   /**
+   * Logout handler - exposed globally
+   */
+  window.ccLogout = function () {
+    localStorage.removeItem("cc_jwt");
+    localStorage.removeItem("cc_user");
+    location.replace("/login");
+  };
+
+  /**
+   * Update sidebar user info
+   */
+  function updateSidebarUser() {
+    const user = getUser();
+    const el = document.getElementById("sidebar-username");
+    if (el) el.textContent = user || "Guest";
+    // Hide logout button if no token (e.g., localhost mode without JWT)
+    const btn = document.getElementById("logout-btn");
+    const userInfo = document.getElementById("sidebar-user-info");
+    if (btn && userInfo) {
+      const hasToken = !!getToken();
+      btn.style.display = hasToken ? "block" : "none";
+      userInfo.style.display = hasToken ? "flex" : "none";
+    }
+  }
+
+  /**
    * Toggle sidebar collapsed state
    */
   window.toggleSidebar = function () {
@@ -320,7 +370,8 @@
   // Fetch jobs count separately (since it's a different API)
   async function fetchJobsCount() {
     try {
-      const response = await fetch("/api/jobs");
+      const response = await authFetch("/api/jobs");
+      if (!response) return;
       const data = await response.json();
       sidebarState.jobs = data.jobs?.length || 0;
       updateBadges();
