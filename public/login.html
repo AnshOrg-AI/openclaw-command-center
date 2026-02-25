@@ -418,8 +418,8 @@
     // If already logged in, redirect
     const existingToken = localStorage.getItem('cc_jwt');
     if (existingToken) {
-      const dest = new URLSearchParams(location.search).get('from') || '/';
-      location.replace(dest);
+      "/";
+      window.location.href = "/";
     }
 
     // Password toggle
@@ -471,8 +471,8 @@
 
           // Redirect
           setTimeout(() => {
-            const dest = new URLSearchParams(location.search).get('from') || '/';
-            location.replace(dest);
+            "/";
+            window.location.href = "/";
           }, 1000);
         } else {
           showError(data.error || 'Invalid credentials. Please try again.');
